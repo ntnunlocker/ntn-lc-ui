@@ -1,0 +1,91 @@
+<fieldset id="connSection">
+  <legend>Setup</legend>
+  <div class="row">
+    <div class="col col-30">
+      <h3 class="sub">RPC Endpoint</h3>
+      <div id="rpcRow" class="inline-group" style="margin-top:6px; align-items:center; gap:8px;">
+        <select id="rpcSel" class="short">
+          <option value="https://rpc.autonity-apis.com">MainNet - autonity-apis.com</option>
+          <option value="https://autonity.rpc.subquery.network/public">MainNet - subquery.network</option>
+          <option value="https://autonity.rpc.web3cdn.network">MainNet - web3cdn.network</option>
+          <option value="custom">Custom…</option>
+        </select>
+        <input id="rpcUrl" class="addr" type="text" value="https://rpc.autonity-apis.com" placeholder="Enter RPC endpoint URL" />
+        <span id="rpcLight" class="dot off" title="RPC status" style="margin-left:6px;"></span>
+      </div>
+      <h3 class="sub" style="margin-top:8px;">Protocol Config</h3>
+      <div class="subsection">
+        <label class="small-label">Autonity (NTN)</label>
+        <input id="protocolAddr" class="addr" type="text" value="0xBd770416a3345F91E4B34576cb804a576fa48EB1" placeholder="0x... (NTN ERC-20 / Autonity)" readonly>
+        <div id="protoAddrWarn" class="small warn" style="display:none; margin-top:4px;"></div>
+        <div class="inline-group" style="margin-top:6px;">
+          <div>
+            <label class="small-label">Epoch (blocks)</label>
+            <input id="epochPeriod" class="short" type="number" min="1" step="1" value="" readonly>
+          </div>
+          <div>
+            <label class="small-label">Unbonding (blocks)</label>
+            <input id="unbondEpochs" class="short" type="number" min="1" step="1" value="" readonly>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col col-20">
+      <h3 class="sub">Wallet</h3>
+      <div class="subsection">
+        <table class="mini">
+          <tbody>
+            <tr>
+              <th>Account</th>
+              <td class="account-cell">
+                <span id="connUser">(not connected)</span>
+                <button id="btnAccManage" title="Switch account" aria-label="Switch account" style="margin-left:6px; padding:0 6px; height:18px; line-height:1; font-size:12px; background:#2a3648; color:#e6e9f0; border:1px solid #2a313d; border-radius:4px;">⇄</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div id="rowConnect" class="inline-group" style="margin-top:6px; align-items:center;">
+          <button id="btnConnect">Connect Wallet</button>
+          <span id="connAccountDot" class="dot off" title="Wallet status" style="margin-left:8px;"></span>
+          <span id="connSendWarn" class="small warn" style="margin-left:8px;">⚠️ Connect wallet to send txs</span>
+        </div>
+        <div id="rowRefresh" class="inline-group" style="margin-top:6px; align-items:center;">
+          <button id="btnLoad">Load / Refresh</button>
+          <span id="refreshLight" class="dot off" title="Refresh status" style="margin-left:8px;"></span>
+          <span id="epochWarn" class="warn-badge" title="Epoch changed; refresh to update accounting" style="display:none; margin-left:6px;">
+            ⚠️ <span class="txt">Refresh to update accounting</span>
+          </span>
+        </div>
+      </div>
+      <div id="connInfo" class="small muted" style="margin-top: 4px;"></div>
+      <h3 class="sub" style="margin-top:8px;">Blockchain</h3>
+      <div id="connStats" class="subsection" style="margin-top:4px;">
+        <div class="kv-row">
+          <div class="kv"><span class="k">Block</span><span id="connBlock" class="v">-</span></div>
+          <div class="kv"><span class="k">Epoch</span><span id="connEpoch" class="v">-</span></div>
+        </div>
+        <div class="kv-row">
+          <div class="kv wide">
+            <span class="k">Progress</span>
+            <div id="connProgTrack" class="prog-track"><div id="connProgFill" class="prog-fill"></div></div>
+            <span id="connProgPct" class="mono-tight small muted"></span>
+          </div>
+          <div class="kv"><span class="k">To Next</span><span id="connToNext" class="v">-</span></div>
+        </div>
+        <!-- Temporarily hidden:
+        <div class="kv-row">
+          <div class="kv"><span class="k">Time</span><span id="connTime" class="v">-</span></div>
+          <div class="kv"><span class="k">Epoch Start</span><span id="connEpochStart" class="v">-</span></div>
+        </div>
+        -->
+      </div>
+    </div>
+
+    <div class="col col-50">
+      <h3>Validators</h3>
+      <div id="connValidators" class="subsection mono-tight"></div>
+    </div>
+  </div>
+</fieldset>
+

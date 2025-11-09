@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Autonity DSI Consolidated View (WIP)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../common/style.css">
+  <script src="../common/common.js"></script>
+</head>
+<body>
+  <div id="topBlock">
+    <h1 id="pageTitle">Delegator Consolidated View (WIP)</h1>
+    <div id="setupMount"></div>
+  </div>
+  <div id="topSpacer"></div>
+  <script>
+    window.__setupReady = (typeof loadCommonSetup === 'function') ? loadCommonSetup({ basePath: '../', mountId: 'setupMount' }) : Promise.resolve();
+    // Inject shared disclaimer banner + popup
+    try { if (typeof loadCommonDisclaimer === 'function') loadCommonDisclaimer({ basePath: '../', topBlockId: 'topBlock', setupMountId: 'setupMount' }); } catch {}
+    // Inject shared title controls (currency, FX, decimals, ton toggle)
+    try { if (typeof loadTitleControls === 'function') loadTitleControls({ basePath: '../' }); } catch {}
+  </script>
+  <div class="wip-note">
+    This page will provide a consolidated view for a set of delegator‑selected accounts to stake straightforwardly. For now it only exposes the shared Setup. Use <a href="../lci/lc-dashboard.html">LC Dashboard</a> for full functionality.
+  </div>
+</body>
+</html>

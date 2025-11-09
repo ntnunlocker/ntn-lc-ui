@@ -1,0 +1,42 @@
+<!-- Shared title controls: currency, FX rate, decimals, base-unit toggle (ton) -->
+<label for="selCurrency">Currency</label>
+<select id="selCurrency">
+  <option value="NTN">NTN</option>
+  <option value="USD">USD</option>
+  <!-- Future: add EUR/GBP via rates service -->
+  <!-- <option value="EUR">EUR</option> -->
+  <!-- <option value="GBP">GBP</option> -->
+</select>
+<label for="usdRate">1 NTN = $</label>
+<input id="usdRate" type="number" step="0.0001" value="0.90" style="width:100px;" />
+
+<label for="decPlaces">Decimals</label>
+<select id="decPlaces">
+  <option value="0">0</option>
+  <option value="1">1</option>
+  <option value="2">2</option>
+  <option value="3">3</option>
+  <option value="4">4</option>
+  <option value="5">5</option>
+  <option value="6">6</option>
+  <option value="7">7</option>
+  <option value="8">8</option>
+  <option value="9">9</option>
+  <option value="10">10</option>
+  <option value="11">11</option>
+  <option value="12">12</option>
+  <option value="13">13</option>
+  <option value="14">14</option>
+  <option value="15">15</option>
+  <option value="16">16</option>
+  <option value="17">17</option>
+  <option value="18">18</option>
+  </select>
+
+<!-- Base unit toggle: ton (10^18) -->
+<label for="chkWei" title="Show raw base units (ton). ton is Autonity’s 10^18 base unit, equivalent to Ethereum wei. See docs.">ton</label>
+<input id="chkWei" type="checkbox" title="Show raw base units (ton). ton = 10^18 base unit. https://docs.autonity.org/concepts/protocol-assets/auton/#unit-measures-of-auton" style="vertical-align: middle;" />
+
+<a class="help-link" href="https://autonity.github.io/ntn-locking-contracts/" target="_blank" rel="noopener noreferrer" title="Visit NTN Locking Contracts documentation (opens in new tab)">
+  <span style="font-weight:600">Help?</span>
+</a>

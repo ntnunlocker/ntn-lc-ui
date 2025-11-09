@@ -1,0 +1,21 @@
+<!-- Warning banner (small, sliding text) -->
+<div id="topBanner" class="warn-banner" style="margin:6px 0; display:none; align-items:center; justify-content:space-between;">
+  <div class="banner-track"><span class="banner-marquee">
+    ⚠️ Important Notice: This dashboard is a community-developed tool provided on an “AS IS” and “AS AVAILABLE” basis for development purposes only. It has not been independently audited, verified, or certified, and may contain defects, inaccuracies, or security vulnerabilities. By using this tool, you acknowledge that (i) you do so entirely at your own risk, (ii) you are solely responsible for any actions taken and any consequences thereof, and (iii) no warranties (express or implied), support, or guarantees of fitness, merchantability, non‑infringement, or accuracy are provided. Do not use this tool for production, financial decisions, or with real funds. Always verify results independently.
+  </span></div>
+  <button id="bannerClose" title="Hide" style="background:transparent;border:0;color:var(--bbg-warn);cursor:pointer; margin-left:8px;">✕</button>
+</div>
+
+<!-- Disclaimer Popup (first load) -->
+<div id="discOverlay" style="display:none; position:fixed; inset:0; background: rgba(0,0,0,0.55); z-index: 2200;">
+  <div style="position:absolute; left:50%; top:22%; transform:translateX(-50%); width:min(680px,94vw); background:var(--bbg-panel-2); color:var(--bbg-text); border:1px solid var(--bbg-border); border-radius:8px; box-shadow:0 10px 24px rgba(0,0,0,0.7);">
+    <div style="padding:10px 12px; border-bottom:1px solid var(--bbg-border); font-weight:800; color:var(--bbg-warn);">⚠️ Disclaimer</div>
+    <div style="padding:12px;">
+      <p style="margin:0 0 8px 0;">This dashboard is a community‑developed tool intended solely for development, visualization, and testing. It is provided strictly on an “AS IS” and “AS AVAILABLE” basis, without any warranties of any kind (express or implied), including but not limited to warranties of merchantability, fitness for a particular purpose, non‑infringement, accuracy, or availability. The tool has not been independently audited, validated, or certified, and may contain defects, vulnerabilities, or inaccuracies.</p>
+      <p style="margin:0 0 8px 0;">By continuing to use this tool, you acknowledge and agree that: (i) you do so entirely at your own risk; (ii) you are solely responsible for any actions you take based on information or functionality provided here; (iii) you assume full responsibility for any loss or damage (including financial loss) resulting from such use; and (iv) no support, guarantees, or obligations are offered by the authors, maintainers, or contributors. Do not use this tool for production systems, financial decisions, or with real funds. Always verify results independently.</p>
+    </div>
+    <div style="display:flex; gap:8px; justify-content:flex-end; padding:8px 12px; border-top:1px solid var(--bbg-border);">
+      <button id="discOk">I Understand</button>
+    </div>
+  </div>
+</div>

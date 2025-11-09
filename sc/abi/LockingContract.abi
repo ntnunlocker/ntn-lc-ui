@@ -1,0 +1,976 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "contract IAutonity",
+        "name": "autonity",
+        "type": "address"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "admin",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "beneficiary",
+            "type": "address"
+          },
+          {
+            "internalType": "bool",
+            "name": "allowChangeBeneficiary",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct ILockingContract.RecipientProfile",
+        "name": "recipientProfile",
+        "type": "tuple"
+      },
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "ntnBalance",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "start",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "cliffDuration",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalDuration",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct ILockingContract.UnlockingProfile",
+        "name": "unlockingProfile",
+        "type": "tuple"
+      },
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "stakingStartTime",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "canStake",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct ILockingContract.StakingProfile",
+        "name": "stakingProfile",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newAdmin",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "oldAdmin",
+        "type": "address"
+      }
+    ],
+    "name": "AdminChanged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newBeneficiary",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "oldBeneficiary",
+        "type": "address"
+      }
+    ],
+    "name": "BeneficiaryChanged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "beneficiary",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "availableValue",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "requestedAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "transferred",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "remaining",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "enum ILockingContract.ReleaseResponse",
+        "name": "reason",
+        "type": "uint8"
+      }
+    ],
+    "name": "FundsReleaseSummary",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "FundsReleased",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "StakingRewardReleased",
+    "type": "event"
+  },
+  {
+    "stateMutability": "payable",
+    "type": "fallback"
+  },
+  {
+    "inputs": [],
+    "name": "accruedFunds",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address[]",
+        "name": "validators",
+        "type": "address[]"
+      }
+    ],
+    "name": "addValidators",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "validator",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "bond",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newAdmin",
+        "type": "address"
+      }
+    ],
+    "name": "changeContractAdmin",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newBeneficiary",
+        "type": "address"
+      }
+    ],
+    "name": "changeContractBeneficiary",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "validator",
+        "type": "address"
+      }
+    ],
+    "name": "claimATNRewards",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "claimAllATNRewards",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "claimAllRewards",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "claimAllStakingRewards",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "claimStakingRewards",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "contractTotalValue",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getBeneficiary",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getContract",
+    "outputs": [
+      {
+        "components": [
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "ntnBalance",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "start",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "cliffDuration",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "totalDuration",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct ILockingContract.UnlockingProfile",
+            "name": "unlockingProfile",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "admin",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "beneficiary",
+                "type": "address"
+              },
+              {
+                "internalType": "bool",
+                "name": "allowChangeBeneficiary",
+                "type": "bool"
+              }
+            ],
+            "internalType": "struct ILockingContract.RecipientProfile",
+            "name": "recipientProfile",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "totalShare",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "withdrawnShare",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct ILockingContract.ValuationProfile",
+            "name": "valuationProfile",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "stakingStartTime",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bool",
+                "name": "canStake",
+                "type": "bool"
+              }
+            ],
+            "internalType": "struct ILockingContract.StakingProfile",
+            "name": "stakingProfile",
+            "type": "tuple"
+          },
+          {
+            "internalType": "uint256",
+            "name": "deployTimestamp",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct ILockingContract.Contract",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getLockingFactoryAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getValidatorSet",
+    "outputs": [
+      {
+        "internalType": "address[]",
+        "name": "",
+        "type": "address[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "validator",
+        "type": "address"
+      }
+    ],
+    "name": "lastBondingEpoch",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "validator",
+        "type": "address"
+      }
+    ],
+    "name": "lastBondingID",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "validator",
+        "type": "address"
+      }
+    ],
+    "name": "lastUnbondingID",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "validator",
+        "type": "address"
+      }
+    ],
+    "name": "liquidBalance",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "lockChangeBeneficiary",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "validator",
+        "type": "address"
+      }
+    ],
+    "name": "lockedLiquidBalance",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "index",
+        "type": "uint256"
+      }
+    ],
+    "name": "pendingBondingRequestAt",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "epochID",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "validator",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "requestID",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct PendingStakingRequest",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "pendingBondingRequestCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "index",
+        "type": "uint256"
+      }
+    ],
+    "name": "pendingUnbondingRequestAt",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "epochID",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "validator",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "requestID",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct PendingStakingRequest",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "pendingUnbondingRequestCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "releaseAllLNTN",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "releaseAllNTN",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "releaseFunds",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "validator",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "releaseLNTN",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "releaseNTN",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "remaining",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "validator",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "unbond",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "unclaimedATNRewards",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "unclaimedStakingRewards",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "unlockedFunds",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "validator",
+        "type": "address"
+      }
+    ],
+    "name": "unlockedLiquidBalance",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "updateFundsAndGetContract",
+    "outputs": [
+      {
+        "components": [
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "ntnBalance",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "start",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "cliffDuration",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "totalDuration",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct ILockingContract.UnlockingProfile",
+            "name": "unlockingProfile",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "admin",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "beneficiary",
+                "type": "address"
+              },
+              {
+                "internalType": "bool",
+                "name": "allowChangeBeneficiary",
+                "type": "bool"
+              }
+            ],
+            "internalType": "struct ILockingContract.RecipientProfile",
+            "name": "recipientProfile",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "totalShare",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "withdrawnShare",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct ILockingContract.ValuationProfile",
+            "name": "valuationProfile",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "stakingStartTime",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bool",
+                "name": "canStake",
+                "type": "bool"
+              }
+            ],
+            "internalType": "struct ILockingContract.StakingProfile",
+            "name": "stakingProfile",
+            "type": "tuple"
+          },
+          {
+            "internalType": "uint256",
+            "name": "deployTimestamp",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct ILockingContract.Contract",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "stateMutability": "payable",
+    "type": "receive"
+  }
+]
