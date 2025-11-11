@@ -2630,14 +2630,22 @@
     try { return !!(signer && userAddr && userAddr !== '(read‑only)'); } catch { return false; }
   }
 
-  //
-  function updateWalletStatusUI() {
+  async function updateWalletStatusUI() {
     try {
-      const connected = isWalletConnected();
       const dot = document.getElementById('connAccountDot');
-      if (dot) dot.classList.toggle('off', !connected);
-      const sw = document.getElementById('connSendWarn');
-      if (sw) sw.style.display = connected ? 'none' : 'block';
+      const warn = document.getElementById('connSendWarn');
+      if (!dot && !warn) return;
+      // Default: assume disconnected
+      const setDot = (c) => { try { dot && dot.classList.remove('off','green','orange','red'); dot && dot.classList.add(c); } catch {} };
+      const showWarn = (msg) => { try { if (warn) { warn.textContent = msg || ''; warn.style.display = msg ? 'block' : 'none'; } } catch {} };
+      const noAcc = !userAddr || userAddr === '(no account)' || userAddr === '(read-only)';
+      if (!signer || noAcc) { setDot('red'); showWarn('⚠️ Connect wallet to send txs'); return; }
+      let walletId = null, rpcId = null;
+      try { if (provider && provider.getNetwork) { const net = await provider.getNetwork(); walletId = Number(net && net.chainId); } } catch {}
+      try { const rp = readProvider || provider; if (rp && rp.getNetwork) { const net2 = await rp.getNetwork(); rpcId = Number(net2 && net2.chainId); } } catch {}
+      const mismatch = (walletId != null && rpcId != null && walletId !== rpcId) || (walletId != null && rpcId == null);
+      if (mismatch) { setDot('orange'); showWarn('⚠️ Networks do not match'); }
+      else { setDot('green'); showWarn(''); }
     } catch {}
   }
 
@@ -2648,6 +2656,45 @@
       const code = await rp.getCode(addr);
       return !!(code && code !== '0x');
     } catch { return false; }
+  }
+
+  // Derive current connectivity/network state to drive buttons and warnings
+  async function __computeNetState() {
+    let connected = false;
+    let walletId = null, rpcId = null;
+    try { connected = !!(signer && userAddr && userAddr !== '(no account)' && userAddr !== '(read-only)'); } catch {}
+    try { if (provider && provider.getNetwork) { const n = await provider.getNetwork(); walletId = Number(n && n.chainId); } } catch {}
+    try { const rp = readProvider || provider; if (rp && rp.getNetwork) { const n2 = await rp.getNetwork(); rpcId = Number(n2 && n2.chainId); } } catch {}
+    const mismatch = (walletId != null && rpcId != null && walletId !== rpcId);
+    const rpcBad = (rpcId == null);
+    return { connected, walletId, rpcId, mismatch, rpcBad };
+  }
+
+  // Update all method submit buttons to reflect connection/network state
+  async function updateMethodButtonsState() {
+    try {
+      const st = await __computeNetState();
+      const host = document.getElementById('methods'); if (!host) return;
+      const forms = host.querySelectorAll('form');
+      forms.forEach((form) => {
+        try {
+          const isWrite = form && form.getAttribute('data-write') === '1';
+          const btn = form && form.querySelector('button[type="submit"]');
+          if (!isWrite || !btn) return;
+          // Remove previous dynamic warnings
+          const old = form.querySelector('.net-warn'); if (old) old.remove();
+          if (!st.connected) {
+            btn.disabled = true;
+            const note = document.createElement('div'); note.className = 'small warn net-warn'; note.textContent = '⚠️ Connect to send tx'; form.appendChild(note);
+          } else if (st.rpcBad || st.mismatch) {
+            btn.disabled = true;
+            const note = document.createElement('div'); note.className = 'small warn net-warn'; note.textContent = '⚠️ Networks do not match'; form.appendChild(note);
+          } else {
+            btn.disabled = false;
+          }
+        } catch {}
+      });
+    } catch {}
   }
 
   // Attempt to fetch protocol config (epoch period, unbonding epochs) from the Autonity contract (protoAddr)
@@ -2893,14 +2940,15 @@
         setContractSectionsVisible(false, 'Set RPC endpoint to load data');
         setRefreshLight('off');
         setRpcLight('off');
+        try { if (window.__syncNetworkStatus) await window.__syncNetworkStatus('fetch-state-no-rpc'); } catch {}
         return;
       }
       const okRpc = await rpcResponsive(rp, 7000);
       if (!okRpc) {
-        setContractSectionsVisible(false, 'RPC not responding');
-        const infoEl = document.getElementById('connInfo'); if (infoEl) infoEl.textContent = 'RPC not responding';
+        // Silently mark lights; no banner text
         setRefreshLight('red');
         setRpcLight('red');
+        try { if (window.__syncNetworkStatus) await window.__syncNetworkStatus('fetch-state-rpc-timeout'); } catch {}
         return;
       }
       setRpcLight('green');
@@ -2915,9 +2963,15 @@
           const height = await (readProvider || provider).getBlockNumber();
           const ep = Math.floor(height / epochPeriod);
           renderConnMetrics(height, ep); await renderConnTimes(height);
-          try { if (validatorsPromise) await validatorsPromise; } catch { setRefreshLight('red'); return; }
+          try { if (validatorsPromise) await validatorsPromise; }
+          catch {
+            setRefreshLight('red');
+            try { if (window.__syncNetworkStatus) await window.__syncNetworkStatus('fetch-state-validators-failed'); } catch {}
+            return;
+          }
           setRefreshLight('green');
         } catch { setRefreshLight('red'); }
+        try { if (window.__syncNetworkStatus) await window.__syncNetworkStatus('fetch-state-lc-invalid'); } catch {}
         return;
       }
       const rpcSet = !!(readProvider || provider);
@@ -2925,6 +2979,7 @@
         setContractSectionsVisible(false, 'Set RPC endpoint to load data');
         setRefreshLight('off');
         setRpcLight('off');
+        try { if (window.__syncNetworkStatus) await window.__syncNetworkStatus('fetch-state-rpc-missing'); } catch {}
         return;
       }
       const exists = await contractExists(lcIn);
@@ -2938,9 +2993,15 @@
           const height = await (readProvider || provider).getBlockNumber();
           const ep = Math.floor(height / epochPeriod);
           renderConnMetrics(height, ep); await renderConnTimes(height);
-          try { if (validatorsPromise) await validatorsPromise; } catch { setRefreshLight('red'); return; }
+          try { if (validatorsPromise) await validatorsPromise; }
+          catch {
+            setRefreshLight('red');
+            try { if (window.__syncNetworkStatus) await window.__syncNetworkStatus('fetch-state-lc-validators-failed'); } catch {}
+            return;
+          }
           setRefreshLight('green');
         } catch { setRefreshLight('red'); }
+        try { if (window.__syncNetworkStatus) await window.__syncNetworkStatus('fetch-state-lc-missing'); } catch {}
         return;
       }
       if (!window.__hideUntilFilled) {
@@ -3222,7 +3283,12 @@
     // Pending operations table removed in simplified dashboard layout
 
     // Ensure validators finished (or timed out) before final status
-    try { if (validatorsPromise) await validatorsPromise; } catch { setRefreshLight('red'); return; }
+    try { if (validatorsPromise) await validatorsPromise; }
+    catch {
+      setRefreshLight('red');
+      try { if (window.__syncNetworkStatus) await window.__syncNetworkStatus('fetch-state-validators-final'); } catch {}
+      return;
+    }
     const endEpoch = await getEpochId();
     try {
       const l = document.getElementById('refreshLight');
@@ -4217,6 +4283,7 @@
       try { window.__prevLcAddr = ethers.utils.isAddress(lcAddr) ? ethers.utils.getAddress(lcAddr) : (lcAddr || ''); } catch { window.__prevLcAddr = lcAddr || ''; }
       try { const rpcEl = document.getElementById('rpcUrl'); window.__prevRpcUrl = ((rpcEl && rpcEl.value) || '').trim(); } catch {}
     } catch {}
+    try { if (window.__syncNetworkStatus) await window.__syncNetworkStatus('fetch-state-complete'); } catch {}
   }
 
   async function getProtocolValidatorsList() {
@@ -4426,7 +4493,7 @@
                 provider = new ethers.providers.Web3Provider(injected, 'any');
                 signer = provider.getSigner();
                 try { userAddr = await signer.getAddress(); } catch {}
-                const infoEl = document.getElementById('connInfo'); if (infoEl) infoEl.textContent = 'Provider OK';
+                /* no verbose provider text */
                 const uEl = document.getElementById('connUser'); if (uEl) uEl.textContent = userAddr || '(connected)';
               }
             }
@@ -4470,6 +4537,17 @@
               }
             } catch {}
             // Use wallet's active account for sending; users switch inside MetaMask.
+            // Re-check network alignment before sending
+            let walletId = null, rpcId = null;
+            try { if (provider && provider.getNetwork) { const n1 = await provider.getNetwork(); walletId = Number(n1 && n1.chainId); } } catch {}
+            try { const rp = readProvider || provider; if (rp && rp.getNetwork) { const n2 = await rp.getNetwork(); rpcId = Number(n2 && n2.chainId); } } catch {}
+            if (walletId != null && (rpcId == null || walletId !== rpcId)) {
+              const msg = '⚠️ Wallet network differs from selected RPC. Switch MetaMask to match before sending.';
+              appendLog(msg);
+              try { if (outWrap) outWrap.textContent = msg; } catch {}
+              return;
+            }
+            // Proceed to send
             const lcWrite = new ethers.Contract(lcAddr, abiLC, signer);
             const tx = await lcWrite[name](...args);
             appendLog('Tx: ' + tx.hash);
@@ -4530,8 +4608,8 @@
         const unitNote = document.createElement('div');
         unitNote.className = 'small muted';
         const decInfo = `decimal (≤ ${Math.max(0, Math.min(18, displayDecPlaces))} dp)`;
-        const amtIn = showWei ? 'ton (wei, 10^18)' : decInfo;
-        const amtOut = showWei ? 'ton (wei, 10^18)' : decInfo;
+        const amtIn = showWei ? 'uint256 (base units, 10^18)' : decInfo;
+        const amtOut = showWei ? 'uint256 (base units, 10^18)' : decInfo;
         unitNote.textContent = `Inputs: amounts in ${amtIn}. Outputs: amounts in ${amtOut}.`;
         form.appendChild(unitNote);
       } catch {}
@@ -4541,7 +4619,7 @@
         try {
           const isUint = /^uint(\d+)?(\[\])?$/i.test(String(inp.type||''));
           if (isUint && __isAmountishName(inp.name) && !/wei/i.test(String(inp.name||''))) {
-            labelText += showWei ? ' [ton]' : ` [decimal ≤ ${Math.max(0, Math.min(18, displayDecPlaces))}]`;
+            labelText += showWei ? ' [uint256]' : ` [decimal ≤ ${Math.max(0, Math.min(18, displayDecPlaces))}]`;
           }
         } catch {}
         const lab = document.createElement('label'); lab.textContent = labelText;
@@ -4619,14 +4697,8 @@
       const btn = document.createElement('button'); btn.type = 'submit'; btn.textContent = fn.stateMutability === 'view' ? 'Call' : 'Send Tx';
       form.appendChild(document.createElement('br'));
       form.appendChild(btn);
-      // Disable write methods when no wallet connected; show hint
-      try {
-        const isReadLocal = (fn.stateMutability === 'view' || fn.stateMutability === 'pure');
-        if (!isReadLocal && !signer) {
-          btn.disabled = true;
-          const note = document.createElement('div'); note.className = 'small warn'; note.textContent = '⚠️ Connect to send tx'; form.appendChild(note);
-        }
-      } catch {}
+      try { if (!(fn.stateMutability === 'view' || fn.stateMutability === 'pure')) form.setAttribute('data-write', '1'); } catch {}
+      // Per-button enablement is handled centrally by updateMethodButtonsState()
       // Disable button if beneficiary/admin-only and signer mismatch
       try {
         if (!isRead) {
@@ -4659,6 +4731,7 @@
         });
       }
     });
+    try { await updateMethodButtonsState(); } catch {}
   }
 
   (window.__setupReady || Promise.resolve()).then(() => {
@@ -4670,7 +4743,18 @@
       try { readProvider = window.readProvider || readProvider; } catch {}
       try { signer = window.signer || signer; } catch {}
       try { userAddr = window.userAddr || userAddr; } catch {}
-      updateWalletStatusUI();
+      await updateWalletStatusUI();
+      try { await updateMethodButtonsState(); } catch {}
+      // If still no account after connect attempt, keep state clearly disconnected
+      try {
+        const noAcc = !userAddr || userAddr === '(no account)' || userAddr === '(read-only)';
+        if (!signer || noAcc) {
+          const dot = document.getElementById('connAccountDot');
+          const warn = document.getElementById('connSendWarn');
+          if (dot) { dot.classList.remove('off','green','orange','red'); dot.classList.add('red'); }
+          if (warn) { warn.textContent = '⚠️ Connect wallet to send txs'; warn.style.display = 'block'; }
+        }
+      } catch {}
       // Attach accounts/chain listeners to stay reactive
       try {
         const injected = (typeof window.detectEthereumProvider !== 'undefined')
@@ -4679,17 +4763,23 @@
         if (injected && injected.on) {
           injected.removeAllListeners && injected.removeAllListeners('accountsChanged');
           injected.on('accountsChanged', async (accs) => {
-            try { provider = new ethers.providers.Web3Provider(injected, 'any'); signer = provider.getSigner(); userAddr = await signer.getAddress(); } catch { userAddr = (accs && accs[0]) ? accs[0] : '(no account)'; }
+            try { provider = new ethers.providers.Web3Provider(injected, 'any'); signer = provider.getSigner(); userAddr = await signer.getAddress(); }
+            catch { signer = null; userAddr = (accs && accs[0]) ? accs[0] : '(no account)'; }
+            if (!accs || accs.length === 0) { try { signer = null; } catch {} }
             setRpcLight(accs && accs[0] ? 'green' : 'orange');
             try { const uEl = document.getElementById('connUser'); if (uEl) uEl.textContent = (userAddr && userAddr !== '(no account)') ? userAddr : ((accs && accs[0]) ? accs[0] : '(none)'); } catch {}
-            updateWalletStatusUI();
+            await updateWalletStatusUI();
+            try { await updateMethodButtonsState(); } catch {}
+            try { if (window.__syncNetworkStatus) await window.__syncNetworkStatus('wallet-accounts-changed'); } catch {}
             try { await fetchState(false); await buildMethodsUI(); } catch {}
           });
           injected.removeAllListeners && injected.removeAllListeners('chainChanged');
           injected.on('chainChanged', async (cid) => {
             try { provider = new ethers.providers.Web3Provider(injected, 'any'); signer = provider.getSigner(); userAddr = await signer.getAddress(); } catch {}
             try { const uEl = document.getElementById('connUser'); if (uEl) uEl.textContent = userAddr || '(none)'; } catch {}
-            updateWalletStatusUI();
+            await updateWalletStatusUI();
+            try { await updateMethodButtonsState(); } catch {}
+            try { if (window.__syncNetworkStatus) await window.__syncNetworkStatus('wallet-chain-changed'); } catch {}
             try { await fetchState(false); await buildMethodsUI(); } catch {}
           });
         }
@@ -4770,6 +4860,7 @@
             const changed = prev !== url;
             if (changed) { window.__hideUntilFilled = true; setContractSectionsVisible(false, url ? 'Loading (RPC changed)…' : 'RPC cleared'); }
           } catch {}
+          try { setRpcLight('orange'); } catch {}
           try {
             if (url) {
               readProvider = new ethers.providers.JsonRpcProvider(url);
@@ -4779,6 +4870,7 @@
               appendLog('ℹ️ RPC cleared');
             }
           } catch (e) { appendLog('❌ Failed to set RPC: ' + (e && e.message ? e.message : e)); }
+          try { await updateWalletStatusUI(); } catch {}
           try { const warn = document.getElementById('epochWarn'); if (warn) warn.style.display = 'none'; } catch {}
           try { window.__stateEpoch = undefined; } catch {}
           try {
@@ -4789,7 +4881,7 @@
             renderConnMetrics(height, ep);
             await renderConnTimes(height);
           } catch {}
-          try { await fetchState(true); await buildMethodsUI(); startLiveProgress(); } catch (e) { appendLog('❌ Refresh failed: ' + (e && e.message ? e.message : e)); }
+          try { await fetchState(true); await buildMethodsUI(); startLiveProgress(); await updateMethodButtonsState(); } catch (e) { appendLog('❌ Refresh failed: ' + (e && e.message ? e.message : e)); }
         });
         if (rpcSel) {
           rpcSel.addEventListener('change', async () => {

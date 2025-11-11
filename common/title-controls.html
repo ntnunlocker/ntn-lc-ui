@@ -1,4 +1,4 @@
-<!-- Shared title controls: currency, FX rate, decimals, base-unit toggle (ton) -->
+<!-- Shared title controls: currency, FX rate, decimals, base-unit toggle (uint256) -->
 <label for="selCurrency">Currency</label>
 <select id="selCurrency">
   <option value="NTN">NTN</option>
@@ -33,10 +33,10 @@
   <option value="18">18</option>
   </select>
 
-<!-- Base unit toggle: ton (10^18) -->
-<label for="chkWei" title="Show raw base units (ton). ton is Autonity’s 10^18 base unit, equivalent to Ethereum wei. See docs.">ton</label>
-<input id="chkWei" type="checkbox" title="Show raw base units (ton). ton = 10^18 base unit. https://docs.autonity.org/concepts/protocol-assets/auton/#unit-measures-of-auton" style="vertical-align: middle;" />
+<!-- Base unit toggle: uint256 (10^18) -->
+<label for="chkWei" title="Show raw uint256 base units (10^18). Use this to enter exact values as stored on-chain.">uint256</label>
+<input id="chkWei" type="checkbox" title="Show raw uint256 base units (10^18). Amounts in inputs/outputs are decimals unless this is enabled." style="vertical-align: middle;" />
 
-<a class="help-link" href="https://autonity.github.io/ntn-locking-contracts/" target="_blank" rel="noopener noreferrer" title="Visit NTN Locking Contracts documentation (opens in new tab)">
+<a class="help-link" href="https://autonity.github.io/ntn-locking-contracts/" target="_blank" rel="noopener noreferrer" title="Open NTN Locking Contracts docs (new tab)">
   <span style="font-weight:600">Help?</span>
 </a>
