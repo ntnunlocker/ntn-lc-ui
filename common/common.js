@@ -228,10 +228,10 @@ window.setRefreshLight = window.setRefreshLight || function setRefreshLight(stat
 
 function __showSetupError(msg) {
   const s = String(msg || 'Unknown error');
-  try { const el = document.getElementById('connInfo'); if (el) el.textContent = s; } catch {}
-  if (typeof window.showErrorPopup === 'function') { try { window.showErrorPopup(s); return; } catch {} }
+  // Do not write inline status; use popup + console
+  if (typeof window.showErrorPopup === 'function') { try { window.showErrorPopup(s); } catch {} }
   try { console.error(s); } catch {}
-  try { alert(s); } catch {}
+  try { if (!window.showErrorPopup) alert(s); } catch {}
 }
 
 // Shared wallet connect logic — no network add/switch attempts
@@ -265,8 +265,21 @@ window.commonConnectWallet = async function commonConnectWallet() {
       try {
         accounts = await injected.request({ method: 'eth_requestAccounts' });
       } catch (e) {
-        __showSetupError('Wallet connection failed: ' + (e && e.message ? e.message : e));
-        window.setRpcLight && window.setRpcLight('red');
+        // Handle MetaMask pending request (-32002) or user rejection: show popup and keep UI in red state
+        try { window.signer = null; window.userAddr = '(no account)'; } catch {}
+        const code = (e && (e.code || e.error && e.error.code)) || 0;
+        const msg = (e && e.message ? String(e.message) : '');
+        const pending = code === -32002 || /pending/i.test(msg);
+        const text = pending
+          ? 'Connection already pending in MetaMask. Open MetaMask and complete or cancel it.'
+          : ('Wallet connection failed: ' + msg);
+        try { __showSetupError(text); } catch {}
+        try {
+          const warn = document.getElementById('connSendWarn');
+          const dot = document.getElementById('connAccountDot');
+          if (dot) { dot.classList.remove('off','green','orange','red'); dot.classList.add('red'); }
+          if (warn) { warn.textContent = '⚠️ Connect wallet to send txs'; warn.style.display = 'block'; }
+        } catch {}
         return;
       }
       if (!accounts || accounts.length === 0) {
@@ -284,8 +297,10 @@ window.commonConnectWallet = async function commonConnectWallet() {
       } catch { window.signer = null; window.userAddr = accounts[0]; }
 
       try { const uEl = document.getElementById('connUser'); if (uEl) uEl.textContent = window.userAddr || '(none)'; } catch {}
-      try { const dot = document.getElementById('connAccountDot'); if (dot) dot.classList.remove('off'); } catch {}
-      try { const sw = document.getElementById('connSendWarn'); if (sw) sw.style.display = 'none'; } catch {}
+      try {
+        const dot = document.getElementById('connAccountDot'); if (dot) { dot.classList.remove('off','green','orange','red'); dot.classList.add('green'); }
+        const sw = document.getElementById('connSendWarn'); if (sw) { sw.textContent = ''; sw.style.display = 'none'; }
+      } catch {}
       try { const infoEl = document.getElementById('connInfo'); if (infoEl) infoEl.textContent = ''; } catch {}
       window.setRpcLight && window.setRpcLight('green');
       return;
